@@ -13,27 +13,23 @@ using StringLib.Parse;
 
 CMD cmd = new();
 List<Task<string>> tasks = new();
-for (int i = 0; i < 100; i++)
+for (int i = 0; i < 10000; i++)
 {
 	tasks.Add(cmd.RunCommandAsync($"echo {i}"));
 }
 
-int max = -1;
-while (tasks.Count > 0)
+string[] results = await Task.WhenAll(tasks);
+int count = 0;
+foreach (string result in results)
 {
-	Task<string> result = await Task.WhenAny(tasks);
-	tasks.Remove(result);
-	if (result.Result.ToInt32() > max)
+	if (count++ != result.ToInt32())
 	{
-		max = result.Result.ToInt32();
-		Console.WriteLine(max);
-	}
-	else
-	{
-		Console.WriteLine("没有按顺序");
+		Console.WriteLine("没按顺序");
+		Console.WriteLine(result);
 		break;
 	}
 }
 
+Console.WriteLine("完成");
 // 让主线程不要退出
 Console.ReadLine();

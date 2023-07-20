@@ -103,17 +103,31 @@ public class CMD : IDisposable
 		}
 	}
 
-	private void SendCommand(string cmd, Action<string> callback)
+	private TaskCompletionSource? _sendCmdTcs = null;
+	private readonly object _sendCmdTcsLock = new();
+	private TaskLock _sendCmdTaskLock = new();
+
+	/// <summary>
+	/// 向 CMD 进程发送命令。这个函数只能同时有一个线程在执行，避免两个线程同时向 CMD
+	/// 进行写入导致内容交织在一起。所以这个函数内部加锁了
+	/// </summary>
+	/// <param name="cmd"></param>
+	/// <param name="callback"></param>
+	/// <returns></returns>
+	private async ValueTask SendCommand(string cmd, Action<string> callback)
 	{
 		// 加锁，防止多线程同时向CMD发送命令，会串在一起
+		await _sendCmdTaskLock.AwaitForStart();
 		lock (_callbackQueue)
 		{
 			_callbackQueue.Enqueue(callback);
-			_process.StandardInput.WriteLine("echo {");
-			_process.StandardInput.WriteLine(cmd);
-			_process.StandardInput.WriteLine("echo }");
-			_process.StandardInput.Flush();
 		}
+
+		await _process.StandardInput.WriteLineAsync("echo {");
+		await _process.StandardInput.WriteLineAsync(cmd);
+		await _process.StandardInput.WriteLineAsync("echo }");
+		await _process.StandardInput.FlushAsync();
+		_sendCmdTaskLock.Done();
 	}
 	#endregion
 
@@ -122,7 +136,7 @@ public class CMD : IDisposable
 	{
 		TaskCompletionSource tcs = new();
 		string result = string.Empty;
-		SendCommand(cmd, (str) =>
+		await SendCommand(cmd, (str) =>
 		{
 			result = str;
 			tcs.SetResult();
@@ -131,7 +145,7 @@ public class CMD : IDisposable
 		return result;
 	}
 
-	public async Task<string[]> RunCommandAsync(string[] cmds)
+	public async ValueTask<string[]> RunCommandAsync(string[] cmds)
 	{
 		string[] results = new string[cmds.Length];
 		for (int i = 0; i < cmds.Length; i++)
