@@ -94,6 +94,10 @@ public class CMD : IDisposable
 		}
 	}
 
+	/// <summary>
+	/// 回调委托队列中的委托，进行数据分发
+	/// </summary>
+	/// <param name="receiveStr"></param>
 	private void DistributeData(string receiveStr)
 	{
 		lock (_callbackQueue)
@@ -103,9 +107,10 @@ public class CMD : IDisposable
 		}
 	}
 
-	private TaskCompletionSource? _sendCmdTcs = null;
-	private readonly object _sendCmdTcsLock = new();
-	private TaskLock _sendCmdTaskLock = new();
+	/// <summary>
+	/// 用来防止 SendCommandAsync 被多个线程同时执行
+	/// </summary>
+	private readonly TaskLock _sendCmdTaskLock = new();
 
 	/// <summary>
 	/// 向 CMD 进程发送命令。这个函数只能同时有一个线程在执行，避免两个线程同时向 CMD
@@ -114,7 +119,7 @@ public class CMD : IDisposable
 	/// <param name="cmd"></param>
 	/// <param name="callback"></param>
 	/// <returns></returns>
-	private async ValueTask SendCommand(string cmd, Action<string> callback)
+	private async ValueTask SendCommandAsync(string cmd, Action<string> callback)
 	{
 		// 加锁，防止多线程同时向CMD发送命令，会串在一起
 		await _sendCmdTaskLock.AwaitForStart();
@@ -136,7 +141,7 @@ public class CMD : IDisposable
 	{
 		TaskCompletionSource tcs = new();
 		string result = string.Empty;
-		await SendCommand(cmd, (str) =>
+		await SendCommandAsync(cmd, (str) =>
 		{
 			result = str;
 			tcs.SetResult();
