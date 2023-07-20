@@ -102,34 +102,35 @@ public class CMD : IDisposable
 		lock (_callbackQueue)
 		{
 			Action<string> action = _callbackQueue.Dequeue();
-			action?.Invoke(receiveStr);
+			action.Invoke(receiveStr);
 		}
 	}
 
-	private async Task RunCommandAsync(string cmd, Action<string> callback)
+	private void SendCommand(string cmd, Action<string> callback)
 	{
-		// 禁止多线程同时向CMD发送命令，会串在一起
-		_semaphore.WaitOne();
-		_callbackQueue.Enqueue(callback);
-		await _process.StandardInput.WriteLineAsync("echo {");
-		await _process.StandardInput.WriteLineAsync(cmd);
-		await _process.StandardInput.WriteLineAsync("echo }");
-		await _process.StandardInput.FlushAsync();
-		_semaphore.Release();
+		// 加锁，防止多线程同时向CMD发送命令，会串在一起
+		lock (_callbackQueue)
+		{
+			_callbackQueue.Enqueue(callback);
+			_process.StandardInput.WriteLine("echo {");
+			_process.StandardInput.WriteLine(cmd);
+			_process.StandardInput.WriteLine("echo }");
+			_process.StandardInput.Flush();
+		}
 	}
 	#endregion
 
 	#region 公共 RunCommandAsync 重载
 	public async Task<string> RunCommandAsync(string cmd)
 	{
-		Semaphore semaphore = new(0, 1);
+		TaskCompletionSource tcs = new();
 		string result = string.Empty;
-		await RunCommandAsync(cmd, (str) =>
-		{
-			result = str;
-			semaphore.Release();
-		});
-		semaphore.WaitOne();
+		SendCommand(cmd, (str) =>
+		   {
+			   result = str;
+			   tcs.SetResult();
+		   });
+		await tcs.Task;
 		return result;
 	}
 
