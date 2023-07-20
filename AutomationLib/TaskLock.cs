@@ -1,7 +1,8 @@
 ﻿namespace AutomationLib;
 
 /// <summary>
-/// 将临界区的任务包在 AwaitForStart 方法和 Done 方法之间
+/// 将临界区的任务包在 AwaitForStart 方法和 Done 方法之间，就可以防止多个线程同时执行临界区
+/// 的代码了。本类实现的锁不会导致线程阻塞，等待任务使用的是 await，会将 CPU 让给其他任务
 /// </summary>
 public class TaskLock
 {
