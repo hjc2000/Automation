@@ -46,11 +46,8 @@ public class CMD : IDisposable
 	}
 	#endregion
 
-	#region 私有字段、属性
 	private Process _process { get; set; }
-	private Queue<Action<string>> _callbackQueue = new();
-	private Semaphore _semaphore = new(1, 1);
-	#endregion
+	private readonly Queue<Action<string>> _callbackQueue = new();
 
 	#region 私有方法
 	private StringBuilder _receiveStringBuilder = new();
@@ -126,10 +123,10 @@ public class CMD : IDisposable
 		TaskCompletionSource tcs = new();
 		string result = string.Empty;
 		SendCommand(cmd, (str) =>
-		   {
-			   result = str;
-			   tcs.SetResult();
-		   });
+		{
+			result = str;
+			tcs.SetResult();
+		});
 		await tcs.Task;
 		return result;
 	}

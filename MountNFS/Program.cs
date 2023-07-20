@@ -30,6 +30,7 @@ while (tasks.Count > 0)
 	}
 	else
 	{
+		Console.WriteLine("没有按顺序");
 		break;
 	}
 }
