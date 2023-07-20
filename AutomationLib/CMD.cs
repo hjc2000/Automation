@@ -1,11 +1,12 @@
 ﻿using StringLib;
 using System.Diagnostics;
+using System.Text;
 
 namespace AutomationLib;
 
 public class CMD : IDisposable
 {
-	#region 构造、析构函数
+	#region 生命周期
 	public CMD()
 	{
 		_process = new Process();
@@ -22,7 +23,7 @@ public class CMD : IDisposable
 		_process.StartInfo.RedirectStandardOutput = true;
 		_process.StartInfo.RedirectStandardError = true;
 		// 订阅事件
-		_process.OutputDataReceived += (sender, e) =>
+		_process.OutputDataReceived += (object sender, DataReceivedEventArgs e) =>
 		{
 			string data = e.Data ?? string.Empty;
 			ReceiveData(data);
@@ -32,10 +33,12 @@ public class CMD : IDisposable
 		_process.Start();
 		_process.BeginOutputReadLine();
 	}
+
 	~CMD()
 	{
 		Dispose();
 	}
+
 	public void Dispose()
 	{
 		_process.Close();
@@ -50,10 +53,10 @@ public class CMD : IDisposable
 	#endregion
 
 	#region 私有方法
-	private string _result = string.Empty;
+	private StringBuilder _receiveStringBuilder = new();
 	private int _flag = 0;
 	/// <summary>
-	/// 在回调函数中接收CMD进程传来的数据
+	/// 在回调函数中接收 CMD 进程传来的数据
 	/// </summary>
 	/// <param name="data"></param>
 	private void ReceiveData(string data)
@@ -62,7 +65,7 @@ public class CMD : IDisposable
 		if (data.StartsWith('{'))
 		{
 			// 开始接收
-			_result = string.Empty;
+			_receiveStringBuilder.Clear();
 			_flag = 1;
 		}
 		else if (data.StartsWith('}'))
@@ -76,25 +79,18 @@ public class CMD : IDisposable
 		{
 		case 1:
 			{
-				_result += data;
-				if (!_result.EndsWith('\n'))
-				{
-					_result += "\n";
-				}
-
+				_receiveStringBuilder.AppendLine(data);
 				break;
 			}
 		case 2:
 			{
-				_result += data;
-				if (!_result.EndsWith('\n'))
-				{
-					_result += "\n";
-				}
+				_receiveStringBuilder.AppendLine(data);
+				string result = _receiveStringBuilder.ToString();
+
 				// 接收完成
-				_result = _result.SliceMaxBetween('{', '}') ?? string.Empty;
-				_result = _result.Trim();
-				DistributeData(_result);
+				result = result.SliceMaxBetween('{', '}') ?? string.Empty;
+				result = result.Trim();
+				DistributeData(result);
 				_flag = 0;
 				break;
 			}
@@ -103,8 +99,11 @@ public class CMD : IDisposable
 
 	private void DistributeData(string receiveStr)
 	{
-		Action<string> action = _callbackQueue.Dequeue();
-		action?.Invoke(receiveStr);
+		lock (_callbackQueue)
+		{
+			Action<string> action = _callbackQueue.Dequeue();
+			action?.Invoke(receiveStr);
+		}
 	}
 
 	private async Task RunCommandAsync(string cmd, Action<string> callback)
