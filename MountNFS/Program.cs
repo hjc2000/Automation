@@ -3,6 +3,7 @@
 CMD cmd = new();
 string result = await cmd.RunCommandAsync("\"C:\\Program Files (x86)\\HP Gaming Mouse G160\\GamingMouse.exe\"");
 Console.WriteLine(result);
+cmd.Dispose();
 
 #region 挂载
 MountNFS mount = new();
