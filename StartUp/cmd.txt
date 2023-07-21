@@ -1,0 +1,4 @@
+"C:\Program Files (x86)\HP Gaming Mouse G160\GamingMouse.exe"
+
+rem MountNFS.exe 需要使用 CMD 进程，必须要用 start 命令启动
+start C:\my_app\MountNFS\MountNFS.exe
