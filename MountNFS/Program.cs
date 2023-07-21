@@ -1,12 +1,33 @@
 ﻿using AutomationLib;
 
+using CMD cmd = new();
+using FileStream cmdFile = File.Open(@"C:\我的可执行文件\cmd.txt", FileMode.Open, FileAccess.Read, FileShare.Read);
+using StreamReader sr = new(cmdFile);
+while (true)
+{
+	string? cmdStr = await sr.ReadLineAsync();
+	if (cmdStr == null)
+	{
+		break;
+	}
+	else
+	{
+		cmdStr = cmdStr.Trim();
+		// 空命令不执行
+		if (cmdStr != string.Empty)
+		{
+			Console.WriteLine($"执行：{cmdStr}");
+			Console.WriteLine(await cmd.RunCommandAsync(cmdStr));
+		}
+	}
+}
+
 #region 挂载
 MountNFS mount = new();
 string[] hosts = new string[]
 {
-	"192.168.8.8",
+		"192.168.8.8",
 };
-
 await mount.Mount(hosts);
 #endregion
 
@@ -32,5 +53,3 @@ await mount.Mount(hosts);
 #endregion
 
 Console.WriteLine("完成");
-// 让主线程不要退出
-Console.ReadLine();
