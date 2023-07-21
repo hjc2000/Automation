@@ -53,4 +53,3 @@ await mount.Mount(hosts);
 #endregion
 
 Console.WriteLine("完成");
-Console.ReadLine();
