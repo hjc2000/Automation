@@ -15,12 +15,7 @@ public class MountNFS
 	{
 		Ping ping = new();
 		PingReply reply = await ping.SendPingAsync(ip);
-		if (reply.Status == IPStatus.Success)
-		{
-			return true;
-		}
-
-		return false;
+		return reply.Status == IPStatus.Success;
 	}
 
 	/// <summary>
