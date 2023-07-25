@@ -65,9 +65,10 @@ public class MountNFS
 			cmdResult = await cmd.RunCommandAsync($"mount {ip}:{cmdResult} *");
 			Console.WriteLine(cmdResult);
 		}
-		catch
+		catch (Exception e)
 		{
 			Console.WriteLine("尝试挂载时发生异常");
+			Console.WriteLine(e);
 		}
 	}
 

@@ -1,7 +1,7 @@
 ﻿using AutomationLib;
 
 using CMD cmd = new();
-using FileStream cmdFile = File.Open(@"C:\my_app\cmd.txt", FileMode.Open, FileAccess.Read, FileShare.Read);
+using FileStream cmdFile = File.Open(@"C:\my_app\StartUp.cmd", FileMode.Open, FileAccess.Read, FileShare.Read);
 using StreamReader sr = new(cmdFile);
 while (true)
 {

@@ -1,3 +1,3 @@
-rem 将此文件放到开机启动目录
-"C:\我的可执行文件\StartUp\StartUp.exe"
+rem 将此文件放到开机启动目录，用来启动 StartUp.exe
+"C:\my_app\StartUp\StartUp.exe"
 exit
