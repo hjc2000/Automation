@@ -38,9 +38,10 @@ public class MountNFS
 					Console.WriteLine($"IP 为 {ip} 的主机不在线");
 				}
 			}
-			catch
+			catch (Exception e)
 			{
 				Console.WriteLine("无法 ping 远程主机，检查网络连接");
+				Console.WriteLine(e.ToString());
 			}
 
 			await Task.Delay(2000);
