@@ -64,7 +64,7 @@ public class Mounter
 			cmdResult = cmdResult[startIndex..endIndex];
 			Console.WriteLine($"即将挂载：{ip}:{cmdResult}");
 			// -o mtype=hard
-			cmdResult = await cmd.RunCommandAsync($"mount {ip}:{cmdResult} *");
+			cmdResult = await cmd.RunCommandAsync($"mount -o mtype=hard {ip}:{cmdResult} *");
 			Console.WriteLine(cmdResult);
 		}
 		catch (Exception e)
