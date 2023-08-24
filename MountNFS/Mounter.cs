@@ -1,8 +1,9 @@
-﻿using System.Net.NetworkInformation;
+﻿using AutomationLib;
+using System.Net.NetworkInformation;
 
-namespace AutomationLib;
+namespace MountNFS;
 
-public class MountNFS
+public class Mounter
 {
 	private CMD cmd = new();
 
