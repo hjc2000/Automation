@@ -122,7 +122,7 @@ public class CMD : IDisposable
 	private async ValueTask SendCommandAsync(string cmd, Action<string> callback)
 	{
 		// 加锁，防止多线程同时向CMD发送命令，会串在一起
-		await _sendCmdTaskLock.AwaitForStart();
+		await _sendCmdTaskLock.WaitForStartAsync();
 		lock (_callbackQueue)
 		{
 			_callbackQueue.Enqueue(callback);
