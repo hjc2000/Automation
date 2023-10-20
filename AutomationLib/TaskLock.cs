@@ -35,10 +35,11 @@ public class TaskLock
 	{
 		while (true)
 		{
-			// 如果上一个任务没完成，先等待
+			// 在本地捕获 _tcs，防止等会 _tcs 被改成 null，导致 await localTcs.Task; 发生异常。
 			TaskCompletionSource? localTcs = _tcs;
 			if (localTcs != null)
 			{
+				// 如果上一个任务没完成，先等待
 				await localTcs.Task;
 			}
 
@@ -51,9 +52,12 @@ public class TaskLock
 					_tcs = new TaskCompletionSource();
 					break;
 				}
-
-				// 如果没有退出循环，说明没有获得执行权力，继续下一个循环，在下一个循环中继续等待
 			}
+
+			/* 如果没有退出循环，说明没有获得执行权力，继续下一个循环，在下一个循环中继续等待。
+			 * 但在这之前，本次竞争失败了，让出 CPU，避免一直是同一个任务获得执行权力。
+			 */
+			await Task.Yield();
 		}
 	}
 
