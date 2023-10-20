@@ -13,13 +13,16 @@ public class TaskLock
 	{
 		get
 		{
-			if (_tcs is not null && !_tcs.Task.IsCompleted)
+			lock (_tcsLock)
 			{
-				// 如果任务源非空且任务未完成，就是处于锁定状态
-				return true;
-			}
+				if (_tcs is not null && !_tcs.Task.IsCompleted)
+				{
+					// 如果任务源非空且任务未完成，就是处于锁定状态
+					return true;
+				}
 
-			return false;
+				return false;
+			}
 		}
 	}
 
@@ -33,9 +36,10 @@ public class TaskLock
 		while (true)
 		{
 			// 如果上一个任务没完成，先等待
-			if (_tcs != null)
+			TaskCompletionSource? localTcs = _tcs;
+			if (localTcs != null)
 			{
-				await _tcs.Task;
+				await localTcs.Task;
 			}
 
 			lock (_tcsLock)
