@@ -6,7 +6,6 @@ namespace AutomationLib;
 
 public class CMD : IAsyncDisposable
 {
-	#region 生命周期
 	public CMD()
 	{
 		InnerProcess = new Process();
@@ -49,12 +48,10 @@ public class CMD : IAsyncDisposable
 		await InnerProcess.WaitForExitAsync();
 		InnerProcess.Dispose();
 	}
-	#endregion
 
 	private Process InnerProcess { get; set; }
 	private readonly Queue<Action<string>> _callbackQueue = new();
 
-	#region 私有方法
 	private StringBuilder _receiveStringBuilder = new();
 	private int _flag = 0;
 	/// <summary>
@@ -115,7 +112,7 @@ public class CMD : IAsyncDisposable
 	/// <summary>
 	/// 用来防止 SendCommandAsync 被多个线程同时执行
 	/// </summary>
-	private readonly TaskLock _sendCmdTaskLock = new();
+	private readonly SemaphoreSlim _sendCmdTaskLock = new(1, 1);
 
 	/// <summary>
 	/// 向 CMD 进程发送命令。这个函数只能同时有一个线程在执行，避免两个线程同时向 CMD
@@ -127,7 +124,7 @@ public class CMD : IAsyncDisposable
 	private async ValueTask SendCommandAsync(string cmd, Action<string> callback)
 	{
 		// 加锁，防止多线程同时向CMD发送命令，会串在一起
-		await _sendCmdTaskLock.WaitForStartAsync();
+		await _sendCmdTaskLock.WaitAsync();
 		lock (_callbackQueue)
 		{
 			_callbackQueue.Enqueue(callback);
@@ -137,11 +134,9 @@ public class CMD : IAsyncDisposable
 		await InnerProcess.StandardInput.WriteLineAsync(cmd);
 		await InnerProcess.StandardInput.WriteLineAsync("echo }");
 		await InnerProcess.StandardInput.FlushAsync();
-		_sendCmdTaskLock.Done();
+		_sendCmdTaskLock.Release();
 	}
-	#endregion
 
-	#region 公共 RunCommandAsync 重载
 	public async Task<string> RunCommandAsync(string cmd)
 	{
 		TaskCompletionSource tcs = new();
@@ -165,5 +160,4 @@ public class CMD : IAsyncDisposable
 
 		return results;
 	}
-	#endregion
 }
