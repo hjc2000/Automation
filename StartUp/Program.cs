@@ -1,6 +1,6 @@
 ﻿using AutomationLib;
 
-using CMD cmd = new();
+await using CMD cmd = new();
 string fullPath = System.Diagnostics.Process.GetCurrentProcess().MainModule?.FileName ?? string.Empty;
 string dir = Path.GetDirectoryName(fullPath) ?? string.Empty;
 using FileStream cmdFile = File.Open($"{dir}\\StartUp.cmd", FileMode.Open, FileAccess.Read, FileShare.Read);

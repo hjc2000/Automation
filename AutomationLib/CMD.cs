@@ -1,52 +1,57 @@
-﻿using StringLib;
+﻿using ConverterLib;
 using System.Diagnostics;
 using System.Text;
 
 namespace AutomationLib;
 
-public class CMD : IDisposable
+public class CMD : IAsyncDisposable
 {
 	#region 生命周期
 	public CMD()
 	{
-		_process = new Process();
+		InnerProcess = new Process();
 
 		#region 进程配置
-		_process.StartInfo.FileName = @"CMD.exe";
-		_process.StartInfo.Arguments = "/q /k @echo off";
+		InnerProcess.StartInfo.FileName = @"CMD.exe";
+		InnerProcess.StartInfo.Arguments = "/q /k @echo off";
 		// 直接从可执行文件启动它，不使用shell启动它
-		_process.StartInfo.UseShellExecute = false;
+		InnerProcess.StartInfo.UseShellExecute = false;
 		// 不创建窗口
-		_process.StartInfo.CreateNoWindow = true;
+		InnerProcess.StartInfo.CreateNoWindow = true;
 		// 重定向输入输出
-		_process.StartInfo.RedirectStandardInput = true;
-		_process.StartInfo.RedirectStandardOutput = true;
-		_process.StartInfo.RedirectStandardError = true;
+		InnerProcess.StartInfo.RedirectStandardInput = true;
+		InnerProcess.StartInfo.RedirectStandardOutput = true;
+		InnerProcess.StartInfo.RedirectStandardError = true;
 		// 订阅事件
-		_process.OutputDataReceived += (object sender, DataReceivedEventArgs e) =>
+		InnerProcess.OutputDataReceived += (object sender, DataReceivedEventArgs e) =>
 		{
 			string data = e.Data ?? string.Empty;
 			ReceiveData(data);
 		};
 		#endregion
 
-		_process.Start();
-		_process.BeginOutputReadLine();
+		InnerProcess.Start();
+		InnerProcess.BeginOutputReadLine();
 	}
 
-	~CMD()
+	private bool _disposed = false;
+	public async ValueTask DisposeAsync()
 	{
-		Dispose();
-	}
+		if (_disposed)
+		{
+			return;
+		}
 
-	public void Dispose()
-	{
-		_process.Close();
-		_process.Dispose();
+		_disposed = true;
+		GC.SuppressFinalize(this);
+
+		InnerProcess.Close();
+		await InnerProcess.WaitForExitAsync();
+		InnerProcess.Dispose();
 	}
 	#endregion
 
-	private Process _process { get; set; }
+	private Process InnerProcess { get; set; }
 	private readonly Queue<Action<string>> _callbackQueue = new();
 
 	#region 私有方法
@@ -128,10 +133,10 @@ public class CMD : IDisposable
 			_callbackQueue.Enqueue(callback);
 		}
 
-		await _process.StandardInput.WriteLineAsync("echo {");
-		await _process.StandardInput.WriteLineAsync(cmd);
-		await _process.StandardInput.WriteLineAsync("echo }");
-		await _process.StandardInput.FlushAsync();
+		await InnerProcess.StandardInput.WriteLineAsync("echo {");
+		await InnerProcess.StandardInput.WriteLineAsync(cmd);
+		await InnerProcess.StandardInput.WriteLineAsync("echo }");
+		await InnerProcess.StandardInput.FlushAsync();
 		_sendCmdTaskLock.Done();
 	}
 	#endregion
