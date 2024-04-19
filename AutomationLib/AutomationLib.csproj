@@ -9,7 +9,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\st8630web\JCNET\JCNET.csproj" />
+    <ProjectReference Include="..\..\video\JCNET\JCNET.csproj" />
   </ItemGroup>
 
 </Project>

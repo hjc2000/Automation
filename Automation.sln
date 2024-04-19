@@ -9,7 +9,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AutomationLib", "Automation
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "StartUp", "StartUp\StartUp.csproj", "{C79EB284-CA3D-444D-9036-85B663651C13}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "JCNET", "..\st8630web\JCNET\JCNET.csproj", "{3E9BF05D-590F-49FB-94F6-777E3F450B92}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "JCNET", "..\video\JCNET\JCNET.csproj", "{5003B506-3D18-4AF1-B1CB-C8EF2597B1EB}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -29,10 +29,10 @@ Global
 		{C79EB284-CA3D-444D-9036-85B663651C13}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{C79EB284-CA3D-444D-9036-85B663651C13}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{C79EB284-CA3D-444D-9036-85B663651C13}.Release|Any CPU.Build.0 = Release|Any CPU
-		{3E9BF05D-590F-49FB-94F6-777E3F450B92}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{3E9BF05D-590F-49FB-94F6-777E3F450B92}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{3E9BF05D-590F-49FB-94F6-777E3F450B92}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{3E9BF05D-590F-49FB-94F6-777E3F450B92}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5003B506-3D18-4AF1-B1CB-C8EF2597B1EB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5003B506-3D18-4AF1-B1CB-C8EF2597B1EB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5003B506-3D18-4AF1-B1CB-C8EF2597B1EB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5003B506-3D18-4AF1-B1CB-C8EF2597B1EB}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
